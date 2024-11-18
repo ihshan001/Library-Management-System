@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
+
 public class dashboard extends javax.swing.JFrame {
 
     Connection con;
@@ -18,7 +19,7 @@ public class dashboard extends javax.swing.JFrame {
 
     public dashboard() {
         initComponents();
-        loadMembersToTable(); 
+        loadMembersToTable();
         loadBooksToTable();// Load members into the table at startup
     }
 
@@ -300,7 +301,60 @@ public class dashboard extends javax.swing.JFrame {
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+
     }
+
+    private void searchID() {
+        String memberID = memberIDTxt2.getText().trim();
+        String bookID = bookIDTxt2.getText().trim();
+
+        if (memberID.isEmpty() || bookID.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter both Member ID and Book ID!", "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try (Connection con = DriverManager.getConnection(jdbcUrl, user, dbpassword)) {
+            // Fetch member details
+            String memberSql = "SELECT ID, name, email FROM member WHERE ID = ?";
+            try (PreparedStatement memberPst = con.prepareStatement(memberSql)) {
+                memberPst.setString(1, memberID);
+                try (ResultSet rs = memberPst.executeQuery()) {
+                    if (rs.next()) {
+                        memberIDLbl2.setText(rs.getString("ID"));
+                        nameLbl3.setText(rs.getString("name"));
+                        emailLbl2.setText(rs.getString("email"));
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Member not found!", "Search Error", JOptionPane.WARNING_MESSAGE);
+                    }
+                }
+            }
+
+            // Fetch book details
+            String bookSql = "SELECT ID, title, author FROM book WHERE ID = ?";
+            try (PreparedStatement bookPst = con.prepareStatement(bookSql)) {
+                bookPst.setString(1, bookID);
+                try (ResultSet rs = bookPst.executeQuery()) {
+                    if (rs.next()) {
+                        bookIDLbl2.setText(rs.getString("ID"));
+                        titleLbl3.setText(rs.getString("title"));
+                        authorLbl3.setText(rs.getString("author"));
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Book not found!", "Search Error", JOptionPane.WARNING_MESSAGE);
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(dashboard.class.getName()).log(Level.SEVERE, null, ex);
+            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+ 
+
+
+
+
+
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -364,9 +418,10 @@ public class dashboard extends javax.swing.JFrame {
         memberDisPanel1 = new javax.swing.JPanel();
         memberIDLbl1 = new javax.swing.JLabel();
         nameLbl1 = new javax.swing.JLabel();
-        nameLbl2 = new javax.swing.JLabel();
+        memberIDLbl2 = new javax.swing.JLabel();
         emailLbl1 = new javax.swing.JLabel();
         emailLbl2 = new javax.swing.JLabel();
+        nameLbl3 = new javax.swing.JLabel();
         bookDisPanel1 = new javax.swing.JPanel();
         bookIDLbl1 = new javax.swing.JLabel();
         bookIDLbl2 = new javax.swing.JLabel();
@@ -377,12 +432,13 @@ public class dashboard extends javax.swing.JFrame {
         memberIDLbl3 = new javax.swing.JLabel();
         bookIDLbl3 = new javax.swing.JLabel();
         memberIDTxt2 = new rojerusan.RSMetroTextPlaceHolder();
-        bookIDTXt2 = new rojerusan.RSMetroTextPlaceHolder();
-        dueDate = new rojeru_san.componentes.RSDateChooser();
+        bookIDTxt2 = new rojerusan.RSMetroTextPlaceHolder();
         issueDateLbl = new javax.swing.JLabel();
         issueDateLbl1 = new javax.swing.JLabel();
-        issueDate = new rojeru_san.componentes.RSDateChooser();
         issueBtn = new rojerusan.RSMaterialButtonRectangle();
+        searchIDBtn = new rojerusan.RSMaterialButtonRectangle();
+        issueDate = new com.toedter.calendar.JDateChooser();
+        dueDate = new com.toedter.calendar.JDateChooser();
         rBookPanel = new javax.swing.JPanel();
         memberDisPanel2 = new javax.swing.JPanel();
         issueIdLbl = new javax.swing.JLabel();
@@ -877,11 +933,11 @@ public class dashboard extends javax.swing.JFrame {
         nameLbl1.setText("Name :");
         memberDisPanel1.add(nameLbl1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 70, -1, 20));
 
-        nameLbl2.setBackground(new java.awt.Color(255, 255, 255));
-        nameLbl2.setFont(new java.awt.Font("Source Sans 3 SemiBold", 0, 14)); // NOI18N
-        nameLbl2.setForeground(new java.awt.Color(255, 255, 255));
-        nameLbl2.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 4, 0, new java.awt.Color(0, 0, 0)));
-        memberDisPanel1.add(nameLbl2, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 70, 110, 30));
+        memberIDLbl2.setBackground(new java.awt.Color(255, 255, 255));
+        memberIDLbl2.setFont(new java.awt.Font("Source Sans 3 SemiBold", 0, 14)); // NOI18N
+        memberIDLbl2.setForeground(new java.awt.Color(255, 255, 255));
+        memberIDLbl2.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 4, 0, new java.awt.Color(0, 0, 0)));
+        memberDisPanel1.add(memberIDLbl2, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 30, 110, 30));
 
         emailLbl1.setFont(new java.awt.Font("Source Sans 3 SemiBold", 0, 14)); // NOI18N
         emailLbl1.setForeground(new java.awt.Color(255, 255, 255));
@@ -893,6 +949,12 @@ public class dashboard extends javax.swing.JFrame {
         emailLbl2.setForeground(new java.awt.Color(255, 255, 255));
         emailLbl2.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 4, 0, new java.awt.Color(0, 0, 0)));
         memberDisPanel1.add(emailLbl2, new org.netbeans.lib.awtextra.AbsoluteConstraints(80, 110, 80, 20));
+
+        nameLbl3.setBackground(new java.awt.Color(255, 255, 255));
+        nameLbl3.setFont(new java.awt.Font("Source Sans 3 SemiBold", 0, 14)); // NOI18N
+        nameLbl3.setForeground(new java.awt.Color(255, 255, 255));
+        nameLbl3.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 4, 0, new java.awt.Color(0, 0, 0)));
+        memberDisPanel1.add(nameLbl3, new org.netbeans.lib.awtextra.AbsoluteConstraints(90, 70, 110, 30));
 
         iBookPanel.add(memberDisPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 240, 150));
 
@@ -951,14 +1013,13 @@ public class dashboard extends javax.swing.JFrame {
         memberIDTxt2.setPlaceholder("Enter Name");
         iBookPanel.add(memberIDTxt2, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 150, 180, 30));
 
-        bookIDTXt2.setBackground(new java.awt.Color(0, 0, 0));
-        bookIDTXt2.setForeground(new java.awt.Color(255, 102, 0));
-        bookIDTXt2.setBorderColor(new java.awt.Color(153, 153, 153));
-        bookIDTXt2.setFont(new java.awt.Font("Tw Cen MT", 0, 12)); // NOI18N
-        bookIDTXt2.setPhColor(new java.awt.Color(153, 153, 153));
-        bookIDTXt2.setPlaceholder("Enter Name");
-        iBookPanel.add(bookIDTXt2, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 70, 180, 30));
-        iBookPanel.add(dueDate, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 280, -1, -1));
+        bookIDTxt2.setBackground(new java.awt.Color(0, 0, 0));
+        bookIDTxt2.setForeground(new java.awt.Color(255, 102, 0));
+        bookIDTxt2.setBorderColor(new java.awt.Color(153, 153, 153));
+        bookIDTxt2.setFont(new java.awt.Font("Tw Cen MT", 0, 12)); // NOI18N
+        bookIDTxt2.setPhColor(new java.awt.Color(153, 153, 153));
+        bookIDTxt2.setPlaceholder("Enter Name");
+        iBookPanel.add(bookIDTxt2, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 70, 180, 30));
 
         issueDateLbl.setFont(new java.awt.Font("Source Sans 3 SemiBold", 0, 14)); // NOI18N
         issueDateLbl.setForeground(new java.awt.Color(255, 255, 255));
@@ -969,17 +1030,28 @@ public class dashboard extends javax.swing.JFrame {
         issueDateLbl1.setForeground(new java.awt.Color(255, 255, 255));
         issueDateLbl1.setText("Issue Date");
         iBookPanel.add(issueDateLbl1, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 230, -1, 20));
-        iBookPanel.add(issueDate, new org.netbeans.lib.awtextra.AbsoluteConstraints(380, 220, -1, -1));
 
         issueBtn.setBackground(new java.awt.Color(255, 153, 0));
         issueBtn.setText("issue");
         issueBtn.setFont(new java.awt.Font("Century Gothic", 1, 14)); // NOI18N
-        issueBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                issueBtnActionPerformed(evt);
+        issueBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                issueBtnMouseClicked(evt);
             }
         });
-        iBookPanel.add(issueBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(410, 360, 112, 38));
+        iBookPanel.add(issueBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 360, 112, 38));
+
+        searchIDBtn.setBackground(new java.awt.Color(255, 153, 0));
+        searchIDBtn.setText("Search");
+        searchIDBtn.setFont(new java.awt.Font("Century Gothic", 1, 14)); // NOI18N
+        searchIDBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                searchIDBtnMouseClicked(evt);
+            }
+        });
+        iBookPanel.add(searchIDBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(590, 90, 112, 38));
+        iBookPanel.add(issueDate, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 220, 180, 40));
+        iBookPanel.add(dueDate, new org.netbeans.lib.awtextra.AbsoluteConstraints(370, 280, 180, 40));
 
         tabPanel.addTab("tab4", iBookPanel);
 
@@ -1110,13 +1182,13 @@ public class dashboard extends javax.swing.JFrame {
 
         memberTbl2.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null},
-                {null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Issue ID", "Book Name", "Member Name", "Issue Date", "Due Date", "Status"
+                "Issue ID", "Member ID", "Book ID", "Book Name", "Member Name", "Issue Date", "Due Date", "Status"
             }
         ));
         memberTbl2.setAltoHead(20);
@@ -1135,7 +1207,7 @@ public class dashboard extends javax.swing.JFrame {
         memberTbl2.setRowHeight(20);
         jScrollPane5.setViewportView(memberTbl2);
 
-        recordPanel.add(jScrollPane5, new org.netbeans.lib.awtextra.AbsoluteConstraints(120, 190, 490, 110));
+        recordPanel.add(jScrollPane5, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 190, 590, 110));
 
         tabPanel.addTab("tab6", recordPanel);
 
@@ -1246,10 +1318,6 @@ public class dashboard extends javax.swing.JFrame {
         tabPanel.setSelectedIndex(5);
     }//GEN-LAST:event_recordMenuMouseClicked
 
-    private void issueBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_issueBtnActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_issueBtnActionPerformed
-
     private void findBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_findBtnActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_findBtnActionPerformed
@@ -1311,10 +1379,10 @@ public class dashboard extends javax.swing.JFrame {
 
     private void bookResetBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bookResetBtnMouseClicked
         // TODO add your handling code here:
-                bookIDTxt.setText("");
-                titleTxt.setText("");
-                authorTxt.setText("");
-                yearPublishedTxt.setText("");
+        bookIDTxt.setText("");
+        titleTxt.setText("");
+        authorTxt.setText("");
+        yearPublishedTxt.setText("");
     }//GEN-LAST:event_bookResetBtnMouseClicked
 
     private void bookTblMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bookTblMouseClicked
@@ -1331,8 +1399,8 @@ public class dashboard extends javax.swing.JFrame {
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error selecting row: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-    
-        
+
+
     }//GEN-LAST:event_bookTblMouseClicked
 
     private void memberTbl1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_memberTbl1MouseClicked
@@ -1362,6 +1430,16 @@ public class dashboard extends javax.swing.JFrame {
         manageMembers("delete");
     }//GEN-LAST:event_deleteBtnMouseClicked
 
+    private void searchIDBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_searchIDBtnMouseClicked
+        // TODO add your handling code here:
+        searchID();
+    }//GEN-LAST:event_searchIDBtnMouseClicked
+
+    private void issueBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_issueBtnMouseClicked
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_issueBtnMouseClicked
+
     /**
      * @param args the command line arguments
      */
@@ -1376,16 +1454,24 @@ public class dashboard extends javax.swing.JFrame {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
+
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(dashboard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(dashboard.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(dashboard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(dashboard.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(dashboard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(dashboard.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
+
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(dashboard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(dashboard.class
+                    .getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
@@ -1418,8 +1504,8 @@ public class dashboard extends javax.swing.JFrame {
     private javax.swing.JLabel bookIDLbl2;
     private javax.swing.JLabel bookIDLbl3;
     private javax.swing.JLabel bookIDLbl4;
-    private rojerusan.RSMetroTextPlaceHolder bookIDTXt2;
     private rojerusan.RSMetroTextPlaceHolder bookIDTxt;
+    private rojerusan.RSMetroTextPlaceHolder bookIDTxt2;
     private rojerusan.RSMetroTextPlaceHolder bookIDTxt3;
     private javax.swing.JMenu bookMenu;
     private javax.swing.JPanel bookPanel;
@@ -1430,7 +1516,7 @@ public class dashboard extends javax.swing.JFrame {
     private javax.swing.JLabel bookTitleLbl2;
     private rojerusan.RSMaterialButtonRectangle bookUpdateBtn;
     private rojerusan.RSMaterialButtonRectangle deleteBtn;
-    private rojeru_san.componentes.RSDateChooser dueDate;
+    private com.toedter.calendar.JDateChooser dueDate;
     private rojeru_san.componentes.RSDateChooser dueDate2;
     private javax.swing.JLabel dueDateLbl2;
     private javax.swing.JLabel dueDateLbl3;
@@ -1446,7 +1532,7 @@ public class dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel iBookPanel;
     private javax.swing.JPanel issueBookPanel;
     private rojerusan.RSMaterialButtonRectangle issueBtn;
-    private rojeru_san.componentes.RSDateChooser issueDate;
+    private com.toedter.calendar.JDateChooser issueDate;
     private rojeru_san.componentes.RSDateChooser issueDate2;
     private javax.swing.JLabel issueDateLbl;
     private javax.swing.JLabel issueDateLbl1;
@@ -1474,6 +1560,7 @@ public class dashboard extends javax.swing.JFrame {
     private javax.swing.JPanel memberDisPanel2;
     private javax.swing.JLabel memberIDLbl;
     private javax.swing.JLabel memberIDLbl1;
+    private javax.swing.JLabel memberIDLbl2;
     private javax.swing.JLabel memberIDLbl3;
     private rojerusan.RSMetroTextPlaceHolder memberIDTxt;
     private rojerusan.RSMetroTextPlaceHolder memberIDTxt2;
@@ -1486,7 +1573,7 @@ public class dashboard extends javax.swing.JFrame {
     private javax.swing.JMenuBar menuBar;
     private javax.swing.JLabel nameLbl;
     private javax.swing.JLabel nameLbl1;
-    private javax.swing.JLabel nameLbl2;
+    private javax.swing.JLabel nameLbl3;
     private rojerusan.RSMetroTextPlaceHolder nameTxt;
     private javax.swing.JLabel noOfBookLbl;
     private javax.swing.JLabel noOfMemberLbl;
@@ -1500,6 +1587,7 @@ public class dashboard extends javax.swing.JFrame {
     private rojerusan.RSMaterialButtonRectangle resetBtn;
     private rojerusan.RSMaterialButtonRectangle returnBtn;
     private rojerusan.RSMaterialButtonRectangle searchBtn;
+    private rojerusan.RSMaterialButtonRectangle searchIDBtn;
     private javax.swing.JLabel studentIdLbl;
     private javax.swing.JTabbedPane tabPanel;
     private javax.swing.JLabel titleLbl;
